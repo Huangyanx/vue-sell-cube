@@ -14,12 +14,15 @@ import seller from '@/components/seller/seller'
 import ratings from '@/components/ratings/ratings'
 import tab from '@/components/tab/tab'
 import {getSeller} from "api";
+import qs from 'query-string'
 
 export default {
   name: 'App',
   data(){
     return {
-      seller:{}
+      seller:{
+        id:qs.parse(location.search).id
+      }
     }
   },
   computed: {
@@ -56,7 +59,9 @@ export default {
   },
   methods:{
     _getSeller() {
-      getSeller().then((seller)=>{
+      getSeller({
+        id:this.seller.id
+      }).then((seller)=>{
         this.seller=seller
       })
     },

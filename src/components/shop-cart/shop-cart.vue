@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="shop-cart">
-            <div class="content-left" @click="toggleList">
+            <div class="content-left" @click.stop="toggleList">
                 <div class="cart-wrapper">
                     <i class="logo icon-shopping_cart" :class="{'highlight':totalCount>0}"></i>
                     <bubble :number="totalCount"></bubble>
@@ -67,6 +67,10 @@
                     return 0
                 }
             },
+            sticky: {
+                type: Boolean,
+                default: false
+            },
             fold: {
                 type: Boolean,
                 default: true
@@ -114,8 +118,7 @@
 
         },
         created(){
-          this.dropBalls=[],
-          this.listFold=true
+          this.dropBalls=[]
         },
         methods:{
             toggleList(){
@@ -125,6 +128,7 @@
                     }
                     this.listFold=false
                     this._showShopCartList()
+                    this._showShopCartSticky()
                 }else {
                     this.listFold=true
                     this._hideShopCartList()
@@ -171,24 +175,57 @@
                         selectFoods:'selectedFoods'
                     },
                     $events: {
+                        leave: () => {
+                            this._hideShopCartSticky()
+                        },
                         hide: () => {
+
                             this.listFold = true
+                        },
+                        add: (el) => {
+                            this.ShopCartStickyComp.drop(el)
                         }
                     }
                 })
                 this.ShopCartListComp.show()
             },
+            _showShopCartSticky(){
+                this.ShopCartStickyComp=this.ShopCartStickyComp||this.$createShopCartSticky({
+                    $props:{
+                        selectedFoods:'selectedFoods',
+                        deliveryPrice: 'deliveryPrice',
+                        minPrice: 'minPrice',
+                        fold:'listFold',
+                        list: this.ShopCartListComp
+                    }
+                })
+                this.ShopCartStickyComp.show()
+            },
             _hideShopCartList(){
-                this.ShopCartListComp.hide()
+                const list = this.sticky ? this.$parent.list : this.ShopCartListComp
+                list.hide && list.hide()
+            },
+            _hideShopCartSticky() {
+                this.ShopCartStickyComp.hide()
             }
 
+        },
+        watch: {
+            fold(newVal) {
+                this.listFold = newVal
+            },
+            totalCount(count) {
+                if (!this.fold && count === 0) {
+                    this._hideShopCartList()
+                }
+            },
         },
         components:{
             bubble
         }
 
     }
-</script>
+   </script>
 
 <style lang="stylus" scoped>
     @import "~common/stylus/mixin"

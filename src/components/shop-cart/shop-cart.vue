@@ -1,20 +1,22 @@
 <template>
     <div>
         <div class="shop-cart">
-            <div class="content-left" @click.stop="toggleList">
-                <div class="cart-wrapper">
-                    <i class="logo icon-shopping_cart" :class="{'highlight':totalCount>0}"></i>
-                    <bubble :number="totalCount"></bubble>
+            <div class="content" @click.stop="toggleList">
+                <div class="content-left" >
+                    <div class="cart-wrapper">
+                        <i class="logo icon-shopping_cart" :class="{'highlight':totalCount>0}"></i>
+                        <bubble :number="totalCount"></bubble>
+                    </div>
+                    <div class="total-price" :class="{'highlight':totalCount>0}">
+                        ￥{{totalPrice}}
+                    </div>
+                    <div class="desc">另需配送费￥{{deliveryPrice}}</div>
                 </div>
-                <div class="total-price" :class="{'highlight':totalCount>0}">
-                    ￥{{totalPrice}}
+                <div class="content-right" @click="pay">
+                    <div class="pay " :class="payClass">{{payDes}}</div>
                 </div>
-                <div class="desc">另需配送费￥{{deliveryPrice}}</div>
+            </div>
 
-            </div>
-            <div class="content-right">
-                <div class="pay " :class="payClass">{{payDes}}</div>
-            </div>
         </div>
         <div class="ball-container">
             <div v-for="(ball,index) in balls" :key="index" class="ball-wrapper">
@@ -134,6 +136,16 @@
                     this._hideShopCartList()
                 }
             },
+            pay(e) {
+                if (this.totalPrice < this.minPrice) {
+                    return
+                }
+                this.$createDialog({
+                    title: '支付',
+                    content: `您需要支付${this.totalPrice}元`
+                }).show()
+                e.stopPropagation()
+            },
             drop(el){
                 for (let i=0;i<this.balls.length;i++){
                     const ball =this.balls[i]
@@ -231,7 +243,7 @@
     @import "~common/stylus/mixin"
     @import "~common/stylus/variable"
 
-        .shop-cart
+        .content
             display: flex
             background: $color-background
             font-size: 0
